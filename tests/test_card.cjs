@@ -95,3 +95,10 @@ test('editor drops cleared fields and reports the new config', () => {
     assert.match(names, new RegExp(`"name":"${key}"`), key);
   }
 });
+
+test('only overflowing sections scroll; the home page never does and costs stay compact', () => {
+  const src = require('node:fs').readFileSync(require('node:path').join(__dirname, '../dist/switcher-boiler-card.js'), 'utf8');
+  assert.match(src, /\.page \{[^}]*overflow: hidden;/);
+  assert.match(src, /\.sub-body \{[^}]*overflow-y: auto;/);
+  assert.match(src, /\.costs \.bars \{ height: 104px;/);
+});
