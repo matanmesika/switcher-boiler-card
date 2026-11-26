@@ -1,0 +1,38 @@
+# Every option. Leave out whatever you don't need.
+type: custom:switcher-boiler-card
+entity: switch.boiler                       # required: the Switcher switch
+name: Switcher Touch
+
+# Sensors (detected automatically from the Switcher device when left out)
+power: sensor.boiler_power                  # W
+current: sensor.boiler_current              # A
+remaining: sensor.boiler_remaining_time     # HH:MM:SS
+auto_shutdown: sensor.boiler_auto_shutdown  # HH:MM:SS
+
+# Optional sensors (not part of the Switcher integration)
+temperature: sensor.boiler_water_temperature  # any water temperature sensor
+energy: sensor.boiler_energy_monthly          # kWh, with long-term statistics (utility meter)
+energy_total: sensor.boiler_energy            # kWh total, used for the cost of a date range
+cost: sensor.boiler_cost_monthly              # the card divides cost by energy to get the price
+price_per_kwh: 0.6402                         # or set the price directly
+
+# Advanced: run through your own helpers (see helpers.yaml)
+timer: timer.boiler_timer
+run_script: script.boiler_run_timer         # receives `minutes`
+off_script: script.boiler_off
+schedule_action:                            # what a schedule runs at its start time
+  service: script.turn_on
+  service_data:
+    entity_id: script.boiler_scheduled_run
+    variables:
+      job_source: Scheduled
+
+# Look and behaviour
+schedule_tag: boiler      # Scheduler tag for this boiler's schedules
+dial_max: 60              # minutes per full turn of the dial
+max_minutes: 180          # longest timer (default: Auto Shutdown)
+history_days: 30
+auto_off_options: ['01:00', '01:30', '02:00', '03:00', '04:00', '06:00']
+# Colour and page height come from your theme (CSS variables), e.g. in themes.yaml:
+#   switcher-accent: "#ec6650"
+#   switcher-height: 560px

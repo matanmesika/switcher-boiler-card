@@ -1,0 +1,4 @@
+# Automatic setup: the card finds the Switcher's own sensors
+# (power, current, remaining time, auto shutdown) from the device.
+type: custom:switcher-boiler-card
+entity: switch.boiler
