@@ -172,6 +172,10 @@ Then set `energy: sensor.boiler_energy_monthly` (and optionally `energy_total: s
 
 This is an unofficial project, not affiliated with Switcher.
 
+## License
+
+[MIT](LICENSE) © 2026 Matan Mesika
+
 ---
 
 ## עברית — בקצרה
