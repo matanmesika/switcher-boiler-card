@@ -1,0 +1,36 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  card:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: node --check dist/switcher-boiler-card.js
+      - name: Unit tests
+        run: node --test tests/test_card.cjs
+      - name: HACS layout
+        run: |
+          node - <<'NODE'
+          const fs = require('fs');
+          const manifest = JSON.parse(fs.readFileSync('hacs.json', 'utf8'));
+          if (manifest.filename !== 'switcher-boiler-card.js') throw new Error('hacs.json filename');
+          const card = fs.readFileSync('dist/' + manifest.filename, 'utf8');
+          if (!card.includes("customElements.define('switcher-boiler-card'")) throw new Error('card element missing');
+          const readme = fs.readFileSync('README.md', 'utf8');
+          for (const m of readme.matchAll(/docs\/screenshots\/([\w-]+\.png)/g)) {
+            if (!fs.existsSync('docs/screenshots/' + m[1])) throw new Error('missing screenshot ' + m[1]);
+          }
+          console.log('HACS layout OK');
+          NODE
