@@ -4,7 +4,7 @@
 // sensors and uses the integration's timer service. Optional scripts let your own
 // automations handle runs. Schedules use the Scheduler integration; history and costs
 // come from the recorder.
-const CARD_VERSION = '1.0.0';
+const CARD_VERSION = '1.0.1';
 // switcher_kis.turn_on_with_timer accepts 1–150 minutes.
 const SWITCHER_TIMER_MAX = 150;
 const DEFAULTS = {
@@ -62,9 +62,14 @@ const STYLE = `
   :host { --sb-accent: var(--switcher-accent, #ec6650); --sb-warm: #f6c77d; --sb-text: var(--primary-text-color); --sb-muted: var(--secondary-text-color); --sb-line: var(--divider-color); --sb-fill: color-mix(in srgb, var(--primary-text-color) 6%, transparent); }
   ha-card { overflow: hidden; padding: 0; }
   .title { padding: 18px 18px 0; text-align: center; font-size: 18px; font-weight: 700; }
-  .page { display: none; box-sizing: border-box; height: var(--switcher-height, 560px); padding: 8px 18px 18px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
-  .page.active { display: block; }
-  .dial { position: relative; width: min(300px, 78vw); aspect-ratio: 1; margin: 10px auto 0; border-radius: 50%; touch-action: none; user-select: none;
+  .page { display: none; box-sizing: border-box; height: var(--switcher-height, 560px); padding: 8px 18px 18px; overflow: hidden; }
+  .page.active { display: flex; flex-direction: column; }
+  /* Only a part whose content is taller than the card scrolls; the page itself never does. */
+  .page[data-page="schedule"] { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .page[data-page="home"] { justify-content: center; }
+  .sub-body { flex: 1 1 auto; min-height: 0; margin: 0 -18px; padding: 0 18px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+  .sub-body.costs { overflow: hidden; display: flex; flex-direction: column; }
+  .dial { position: relative; flex: none; width: min(300px, 78vw, calc(var(--switcher-height, 560px) - 250px)); aspect-ratio: 1; margin: 10px auto 0; border-radius: 50%; touch-action: none; user-select: none;
     background: radial-gradient(circle, color-mix(in srgb, var(--sb-text) 5%, transparent) 55%, color-mix(in srgb, var(--sb-text) 2%, transparent) 70%, transparent 71%); }
   .disc { position: absolute; inset: 13%; border-radius: 50%; background: color-mix(in srgb, var(--sb-text) 7%, transparent); box-shadow: inset 0 2px 10px rgba(0,0,0,.25), 0 10px 30px rgba(0,0,0,.25); }
   .dial svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
@@ -80,8 +85,8 @@ const STYLE = `
     background: color-mix(in srgb, var(--sb-text) 10%, var(--card-background-color, #222)); box-shadow: 0 0 26px color-mix(in srgb, var(--sb-accent) 45%, transparent), 0 4px 12px rgba(0,0,0,.3); }
   .power ha-icon { --mdc-icon-size: 32px; }
   .on .power { color: #fff; background: var(--sb-accent); box-shadow: 0 0 40px color-mix(in srgb, var(--sb-accent) 75%, transparent); }
-  .status { margin: 18px 4px 4px; font-size: 40px; font-weight: 800; letter-spacing: .5px; }
-  .status-sub { margin: 0 4px 18px; height: 22px; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--sb-muted); font-size: 15px; }
+  .status { flex: none; margin: 14px 4px 4px; font-size: 40px; font-weight: 800; letter-spacing: .5px; }
+  .status-sub { flex: none; margin: 0 4px 14px; height: 22px; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--sb-muted); font-size: 15px; }
   .on .status-sub { color: var(--sb-accent); font-weight: 600; }
   .info { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; align-items: stretch; }
   .info .muted { font-size: 12px; line-height: 1.2; }
@@ -126,6 +131,19 @@ const STYLE = `
   .bars span { width: 70%; min-height: 2px; border-radius: 10px 10px 0 0; background: color-mix(in srgb, var(--sb-accent) 35%, transparent); }
   .bars div.now span { background: var(--sb-accent); }
   .months { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 18px; padding: 6px 6px 0; text-align: center; color: var(--sb-muted); font-size: 13px; }
+  .costs .range { margin-bottom: 10px; }
+  .costs .range input { min-height: 38px; padding: 4px 10px; }
+  .costs .range label { gap: 4px; }
+  .costs .panel { padding: 12px 14px; margin-bottom: 10px; }
+  .costs .line + .line { margin-top: 10px; }
+  .costs .line ha-icon { --mdc-icon-size: 22px; }
+  .costs .value { font-size: 17px; }
+  .costs .muted { font-size: 13px; }
+  .costs .chart { margin-bottom: 0; }
+  .costs .chart h4 { margin-bottom: 8px; font-size: 15px; }
+  .costs .bars { height: 104px; gap: 14px; }
+  .costs .bars em { font-size: 12px; }
+  .costs .months { gap: 14px; font-size: 12px; }
   .illus { display: grid; place-items: center; margin: 30px auto 10px; width: 120px; height: 120px; border-radius: 30px; color: var(--sb-accent); background: linear-gradient(160deg, color-mix(in srgb, var(--sb-accent) 22%, transparent), color-mix(in srgb, var(--sb-warm) 20%, transparent)); }
   .illus ha-icon { --mdc-icon-size: 64px; }
   .center { text-align: center; }
@@ -645,10 +663,11 @@ class SwitcherBoilerCard extends HTMLElement {
     if (this._sub !== 'costs') return;
     const months = this._months ?? [];
     const max = Math.max(...months.map((m) => m.cost), 0.01);
+    body.classList.add('costs');
     body.innerHTML = `<div class="range"><label>From<input type="date" data-from value="${this._from}"></label><i></i><label>Until<input type="date" data-until value="${this._until}"></label></div>
       <div class="panel"><div class="line"><ha-icon icon="mdi:clock-outline"></ha-icon><div><div class="muted">hours of consumption</div><div class="value">${hoursText(seconds)}</div></div></div>
       <div class="line"><ha-icon icon="mdi:cash-multiple"></ha-icon><div><div class="muted">Cost of electricity consumption</div><div class="value">${cost === undefined ? '—' : `${cost.toFixed(2)} ₪`}</div></div></div></div>
-      ${months.length ? `<div class="panel chart"><h4>Comparing with Previous Months</h4><div class="bars">${months.map((m) => `<div class="${m.now ? 'now' : ''}"><em>ILS ${m.cost.toFixed(2)}</em><span style="height:${Math.max(1, (m.cost / max) * 120)}px"></span></div>`).join('')}</div><div class="months">${months.map((m) => `<span>${m.label}</span>`).join('')}</div></div>` : ''}`;
+      ${months.length ? `<div class="panel chart"><h4>Comparing with Previous Months</h4><div class="bars">${months.map((m) => `<div class="${m.now ? 'now' : ''}"><em>ILS ${m.cost.toFixed(2)}</em><span style="height:${Math.max(2, Math.round((m.cost / max) * 76))}px"></span></div>`).join('')}</div><div class="months">${months.map((m) => `<span>${m.label}</span>`).join('')}</div></div>` : ''}`;
     body.onchange = (event) => {
       if (event.target.matches('[data-from]')) this._from = event.target.value;
       if (event.target.matches('[data-until]')) this._until = event.target.value;
@@ -659,6 +678,7 @@ class SwitcherBoilerCard extends HTMLElement {
   _renderHistory() {
     const body = this._root.querySelector('.sub-body');
     body.onchange = null;
+    body.classList.remove('costs');
     if (this._sub === 'costs') {
       this._renderCosts(body);
       return;
