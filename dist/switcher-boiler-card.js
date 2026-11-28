@@ -4,7 +4,7 @@
 // sensors and uses the integration's timer service. Optional scripts let your own
 // automations handle runs. Schedules use the Scheduler integration; history and costs
 // come from the recorder.
-const CARD_VERSION = '1.0.1';
+const CARD_VERSION = '1.0.2';
 // switcher_kis.turn_on_with_timer accepts 1–150 minutes.
 const SWITCHER_TIMER_MAX = 150;
 const DEFAULTS = {
@@ -84,7 +84,7 @@ const STYLE = `
   .power { position: absolute; left: 50%; top: 50%; width: 22%; aspect-ratio: 1; transform: translate(-50%, -50%); border: 0; border-radius: 50%; display: grid; place-items: center; color: var(--sb-text); cursor: pointer;
     background: color-mix(in srgb, var(--sb-text) 10%, var(--card-background-color, #222)); box-shadow: 0 0 26px color-mix(in srgb, var(--sb-accent) 45%, transparent), 0 4px 12px rgba(0,0,0,.3); }
   .power ha-icon { --mdc-icon-size: 32px; }
-  .on .power { color: #fff; background: var(--sb-accent); box-shadow: 0 0 40px color-mix(in srgb, var(--sb-accent) 75%, transparent); }
+  .on .power { color: var(--text-primary-color, #fff); background: var(--sb-accent); box-shadow: 0 0 40px color-mix(in srgb, var(--sb-accent) 75%, transparent); }
   .status { flex: none; margin: 14px 4px 4px; font-size: 40px; font-weight: 800; letter-spacing: .5px; }
   .status-sub { flex: none; margin: 0 4px 14px; height: 22px; line-height: 22px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--sb-muted); font-size: 15px; }
   .on .status-sub { color: var(--sb-accent); font-weight: 600; }
@@ -148,7 +148,7 @@ const STYLE = `
   .illus ha-icon { --mdc-icon-size: 64px; }
   .center { text-align: center; }
   .center h3 { margin: 14px 0 6px; font-size: 20px; }
-  .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border: 0; border-radius: 12px; color: #fff; background: var(--sb-accent); font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; }
+  .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px; border: 0; border-radius: 12px; color: var(--text-primary-color, #fff); background: var(--sb-accent); font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; }
   .secondary { min-height: 48px; padding: 0 22px; border: 1px solid var(--sb-line); border-radius: 12px; color: var(--sb-text); background: transparent; font: inherit; font-weight: 600; cursor: pointer; }
   .sched { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 14px 16px; margin-bottom: 10px; border-radius: 18px; border: 1px solid var(--sb-line); background: var(--sb-fill); }
   .sched strong { display: block; font-size: 19px; }
@@ -164,7 +164,7 @@ const STYLE = `
   .times input { min-height: 48px; padding: 6px 12px; border: 1px solid var(--sb-line); border-radius: 14px; color: var(--sb-text); background: var(--sb-fill); font: inherit; font-size: 20px; font-weight: 700; color-scheme: light dark; }
   .days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
   .days button { min-height: 42px; border: 1px solid var(--sb-line); border-radius: 21px; color: var(--sb-text); background: transparent; font: inherit; font-weight: 600; cursor: pointer; }
-  .days button.on { border-color: var(--sb-accent); color: #fff; background: var(--sb-accent); }
+  .days button.on { border-color: var(--sb-accent); color: var(--text-primary-color, #fff); background: var(--sb-accent); }
   .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .add-row { display: flex; justify-content: center; margin-top: 6px; }
   .toast { padding: 0 18px 12px; color: var(--error-color); font-size: 13px; }
